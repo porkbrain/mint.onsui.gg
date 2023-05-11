@@ -1,0 +1,10 @@
+[package]
+name = "Currency"
+version = "1.0.0"
+published-at = "0x0"
+description = "A blueprint package for publishing a token"
+
+[dependencies.Sui]
+git = "https://github.com/MystenLabs/sui.git"
+subdir = "crates/sui-framework/packages/sui-framework"
+rev = "38c31cdd0f2ae3963d1e06f00c766cd7f90a7be6"
