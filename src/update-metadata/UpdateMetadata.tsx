@@ -21,9 +21,7 @@ export function UpdateMetadata() {
   const coinMetadata = useSelector<State, CoinMetadataMap>(
     (state) => state.coinMetadata.value
   );
-  const treasuries = useSelector<State, TreasuryCapMap>(
-    (state) => state.treasuryCap.value
-  );
+  // user gets to decide which currency to update by the state in the store
   const selectOptions = useSelector<
     State,
     Array<{
@@ -31,15 +29,15 @@ export function UpdateMetadata() {
       label: string;
     }>
   >((state) =>
-    Object.entries(state.coinMetadata.value).map(([treasuryAddr, _]) => {
-      const { innerType } = treasuries[treasuryAddr];
-      return {
+    Object.entries(state.treasuryCap.value)
+      // only show treasuries that HAVE metadata
+      .filter(([treasuryAddr, _]) => !!coinMetadata[treasuryAddr])
+      .map(([treasuryAddr, { innerType }]) => ({
         value: treasuryAddr,
         label: `${formatAddress(innerType.address)}::${innerType.module}::${
           innerType.name
         }`,
-      };
-    })
+      }))
   );
 
   const [selectedTreasury, setSelectedTreasury] = useState(
@@ -58,17 +56,20 @@ export function UpdateMetadata() {
   }
 
   function selectTreasury(addr: string | undefined) {
+    // empty select == clean up
     if (!addr || !coinMetadata[addr]) {
       resetForm();
       return;
     }
 
+    // populate the form with the current metadata
     const metadata = coinMetadata[addr];
     setSymbol(metadata.symbol || "");
     setName(metadata.name || "");
     setDescription(metadata.description || "");
     setIconUrl(metadata.iconUrl || "");
 
+    // and set the selected treasury for the tx fn
     setSelectedTreasury(addr);
   }
 
@@ -306,7 +307,7 @@ async function updateMetadataTx({
 
     if (CHARGE_FEES) {
       let [feeCoin] = tx.splitCoins({ kind: "GasCoin" }, [
-        tx.pure(973000000), // 0.973 SUI
+        tx.pure(970000000), // 0.97 SUI
       ]);
       tx.transferObjects([feeCoin], tx.pure(FEE_ADDR));
     }

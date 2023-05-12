@@ -42,6 +42,9 @@ export const treasuryCapSlice = createSlice({
     setLoaded: (state) => {
       state.isLoaded = true;
     },
+    resetTreasuryCap: (state) => {
+      state.value = {};
+    },
     setTreasuryCap: (state, { payload }: SetTreasuryCapAction) => {
       state.value[payload.cap.addr] = payload.cap;
     },
@@ -67,7 +70,8 @@ export const treasuryCapSlice = createSlice({
   },
 });
 
-export const { setTreasuryCap, setRawTreasuryCap } = treasuryCapSlice.actions;
+export const { setTreasuryCap, setRawTreasuryCap, resetTreasuryCap } =
+  treasuryCapSlice.actions;
 
 export default treasuryCapSlice.reducer;
 

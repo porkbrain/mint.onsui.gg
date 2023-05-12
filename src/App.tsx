@@ -7,6 +7,7 @@ import store, {
   TreasuryCapMap,
   fetchAllTreasuryCaps,
   fetchCoinMetadata,
+  resetTreasuryCap,
   suiClient,
 } from "./store";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -35,15 +36,16 @@ function Section() {
     suiClient.connection = new Connection({ fullnode: rpc.fullnode });
   }, [rpc]);
 
-  // fetch user treasury caps on load
+  // fetch user treasury caps on load or change of rpc
   useEffect(() => {
     if (!isConnected || !currentAccount) return;
-    // TODO: reset state
+    // network might have changed, so reset the state
+    dispatch(resetTreasuryCap());
     fetchAllTreasuryCaps(dispatch, suiClient, currentAccount.address);
   }, [isConnected, currentAccount, rpc]);
 
   // fetch associated coin metadata for the treasuries
-  const { isLoaded: areTresuriesLoaded, value: treasuries } = useSelector<
+  const { isLoaded: areTreasuriesLoaded, value: treasuries } = useSelector<
     State,
     {
       isLoaded: boolean;
@@ -52,11 +54,12 @@ function Section() {
   >((state) => state.treasuryCap);
   useEffect(() => {
     if (!isConnected || !currentAccount) return;
-    // TODO: reset state
+    // no need to reset the state here bcs the select is anyway oriented by
+    // the treasury map
     for (const treasury of Object.values(treasuries)) {
       fetchCoinMetadata(dispatch, suiClient, treasury);
     }
-  }, [isConnected, currentAccount, rpc, areTresuriesLoaded]);
+  }, [isConnected, currentAccount, rpc, areTreasuriesLoaded]);
 
   return (
     <section>

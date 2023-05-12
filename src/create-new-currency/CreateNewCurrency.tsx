@@ -257,6 +257,7 @@ async function createCurrencyTx({
         o.type === "created" && o.objectType.includes("::coin::TreasuryCap<")
     );
     if (treasury && treasury.type === "created") {
+      // update the store so that we can offer token minting
       dispatch(
         setRawTreasuryCap({
           addr: treasury.objectId,
@@ -269,6 +270,7 @@ async function createCurrencyTx({
           o.type === "created" && o.objectType.includes("::coin::CoinMetadata<")
       );
       if (meta && meta.type === "created") {
+        // update the store so that we can offer metadata update
         dispatch(
           setCoinMetadata({
             treasuryAddr: treasury.objectId,

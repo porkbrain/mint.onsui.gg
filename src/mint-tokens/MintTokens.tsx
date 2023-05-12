@@ -7,12 +7,21 @@ import { TransactionBlock, formatAddress } from "@mysten/sui.js";
 import { useState } from "react";
 import { CHARGE_FEES, EXPLORER_URL, FEE_ADDR } from "../consts";
 import Select from "react-select";
-import { useSelector } from "react-redux";
-import { State, RpcState, TreasuryCapMap } from "../store";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  State,
+  RpcState,
+  TreasuryCapMap,
+  fetchAllTreasuryCaps,
+  suiClient,
+} from "../store";
 
 export function MintTokens() {
   const { isConnected, currentAccount } = useWalletKit();
+  const dispatch = useDispatch();
 
+  // user gets to decide for which currency to mint tokens by the state in the
+  // store
   const selectOptions = useSelector<
     State,
     Array<{
@@ -35,6 +44,7 @@ export function MintTokens() {
   );
   const [mintInfo, setMintInfo] = useState("");
 
+  // utility button to show user how to use the mintInfo textarea
   function appendSelfMint() {
     const maybeNewline =
       mintInfo.endsWith("\n") || mintInfo.length === 0 ? "" : "\n";
@@ -55,7 +65,7 @@ export function MintTokens() {
       <p>
         Select the currency for which you'd like to mint tokens. If you don't
         see your desired currency listed, ensure that you're logged in with the
-        correct wallet and then click the refresh button below. TODO
+        correct wallet.
       </p>
 
       <Select
@@ -115,7 +125,6 @@ function SendTransaction({
     useWalletKit();
 
   const rpc = useSelector<State, RpcState>((state) => state.rpc);
-
   const treasuries = useSelector<State, TreasuryCapMap>(
     (state) => state.treasuryCap.value
   );
