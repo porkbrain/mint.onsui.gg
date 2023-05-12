@@ -5,7 +5,12 @@ import {
 } from "@mysten/wallet-kit";
 import { TransactionBlock, formatAddress } from "@mysten/sui.js";
 import { useState } from "react";
-import { CHARGE_FEES, EXPLORER_URL, FEE_ADDR } from "../consts";
+import {
+  CHARGE_FEES,
+  DARK_THEME_STYLES,
+  EXPLORER_URL,
+  FEE_ADDR,
+} from "../consts";
 import Select from "react-select";
 import { useSelector } from "react-redux";
 import { State, RpcState, TreasuryCapMap } from "../store";
@@ -67,6 +72,7 @@ export function MintTokens() {
         onChange={(v) => setSelectedTreasury(v?.value)}
         placeholder="Select currency"
         options={selectOptions}
+        styles={DARK_THEME_STYLES}
       />
       <br />
 
@@ -126,35 +132,40 @@ function SendTransaction({
   const [okMsg, setOkMsg] = useState(<></>);
   const [isConfirming, setIsConfirming] = useState(false);
 
-  if (isConnected && currentAccount) {
+  if (!isConnected || !currentAccount) {
     return (
       <div>
-        {error && <p style={{ color: "red" }}>Error: {error}</p>}
-        {okMsg}
-        <button
-          onClick={() =>
-            mintTokensTx({
-              setError,
-              setOkMsg,
-              setIsConfirming,
-              signAndExecuteTransactionBlock,
-              treasuries,
-              rpc,
-              mintInfo,
-              treasury: treasury!,
-              resetMintInfo,
-            })
-          }
-          disabled={!treasury || isConfirming}
-        >
-          {isConfirming ? <>Confirming ...</> : <>Ask wallet to mint tokens</>}
-        </button>
-        as {formatAddress(currentAccount.address)}
+        <br />
+        <ConnectButton connectText={"Connect wallet to mint tokens"} />
       </div>
     );
-  } else {
-    return <ConnectButton connectText={"Connect wallet to mint tokens"} />;
   }
+
+  return (
+    <div>
+      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      {okMsg}
+      <button
+        onClick={() =>
+          mintTokensTx({
+            setError,
+            setOkMsg,
+            setIsConfirming,
+            signAndExecuteTransactionBlock,
+            treasuries,
+            rpc,
+            mintInfo,
+            treasury: treasury!,
+            resetMintInfo,
+          })
+        }
+        disabled={!treasury || isConfirming || mintInfo.length === 0}
+      >
+        {isConfirming ? <>Confirming ...</> : <>Ask wallet to mint tokens</>}
+      </button>
+      as {formatAddress(currentAccount.address)}
+    </div>
+  );
 }
 
 type MintTokensTxParams = {

@@ -14,7 +14,12 @@ import {
   TreasuryCap,
   setCoinMetadata,
 } from "../store";
-import { CHARGE_FEES, EXPLORER_URL, FEE_ADDR } from "../consts";
+import {
+  CHARGE_FEES,
+  DARK_THEME_STYLES,
+  EXPLORER_URL,
+  FEE_ADDR,
+} from "../consts";
 import { AnyAction } from "@reduxjs/toolkit";
 
 export function UpdateMetadata() {
@@ -94,6 +99,7 @@ export function UpdateMetadata() {
         onChange={(v) => selectTreasury(v?.value)}
         placeholder="Select currency"
         options={selectOptions}
+        styles={DARK_THEME_STYLES}
       />
       <br />
 
@@ -196,7 +202,12 @@ function SendTransaction({
   );
 
   if (!isConnected || !currentAccount) {
-    return <ConnectButton connectText={"Connect wallet to update metadata"} />;
+    return (
+      <div>
+        <br />
+        <ConnectButton connectText={"Connect wallet to update metadata"} />
+      </div>
+    );
   }
 
   return (

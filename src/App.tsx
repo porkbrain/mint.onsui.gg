@@ -1,7 +1,6 @@
 import { WalletKitProvider, useWalletKit } from "@mysten/wallet-kit";
 import { Connection, formatAddress } from "@mysten/sui.js";
 import store, {
-  CoinMetadataMap,
   RpcState,
   State,
   TreasuryCapMap,
@@ -70,7 +69,6 @@ function Section() {
       <MintTokens></MintTokens>
       <UpdateMetadata></UpdateMetadata>
 
-      <hr />
       <DisconnectWallet></DisconnectWallet>
     </section>
   );
@@ -81,6 +79,8 @@ function DisconnectWallet() {
   if (currentAccount) {
     return (
       <div>
+        <hr />
+
         <button onClick={disconnect}>
           Disconnect wallet <b>{formatAddress(currentAccount.address)}</b> from
           this website
@@ -88,6 +88,6 @@ function DisconnectWallet() {
       </div>
     );
   } else {
-    return <div></div>;
+    return <></>;
   }
 }

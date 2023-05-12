@@ -150,7 +150,12 @@ function SendTransaction(
 
   if (!isConnected || !currentAccount) {
     return (
-      <ConnectButton connectText={"Connect wallet to create a new currency"} />
+      <div>
+        <br />
+        <ConnectButton
+          connectText={"Connect wallet to create a new currency"}
+        />
+      </div>
     );
   }
 
