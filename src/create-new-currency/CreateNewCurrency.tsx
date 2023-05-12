@@ -14,6 +14,14 @@ export function CreateNewCurrency() {
   const [decimals, setDecimals] = useState("0");
   const [iconUrl, setIconUrl] = useState("");
 
+  function resetForm() {
+    setSymbol("");
+    setName("");
+    setDescription("");
+    setDecimals("0");
+    setIconUrl("");
+  }
+
   return (
     <div>
       <h2 id="create-new-currency">
@@ -25,20 +33,20 @@ export function CreateNewCurrency() {
         &nbsp;&nbsp;Create a new currency
       </h2>
       <p>
-        To create a new currency on Sui, you need to publish a package. This
-        utility helps you <b>publish your own</b>
-        .&nbsp;You'll spend slightly less than 1 SUI on gas, storage and fee.
-        Once published, you'll be able to mint tokens&nbsp;
+        To create a new currency on Sui, you must publish a package. This
+        utility assists you in <b>publishing your own</b>
+        .&nbsp;You'll spend slightly less than 1 SUI on gas, storage, and fees.
+        Once published, you can mint tokens&nbsp;
         <a href="#mint-tokens">here</a>. You have&nbsp;
-        <b>100% control and ownership</b> over your tokens. Nothing leaves your
-        browser.
+        <b>100% control and ownership</b> over your currency.
       </p>
 
       <p>
-        <i>Symbol</i>&nbsp;is the only mandatory field. Other fields are used by
-        the wallets to pretty-display your currency. You <b>can update</b>
-        &nbsp;the metadata&nbsp;<b>at any time</b> using this form (TODO: link)
-        except <i>decimals</i> which cannot be changed after publishing.
+        The <i>Symbol</i>&nbsp;field is the only mandatory field. You&nbsp;
+        <b>can update</b>
+        &nbsp;the metadata&nbsp;<b>at any time</b>&nbsp;
+        <a href="#update-metadata">here</a>&nbsp;except for <i>Decimals</i>
+        &nbsp;field, which cannot be changed after publishing.
       </p>
 
       <div>
@@ -114,6 +122,7 @@ export function CreateNewCurrency() {
         decimals={Number(decimals)}
         iconUrl={iconUrl}
         description={description}
+        reset={resetForm}
       ></SendTransaction>
     </div>
   );
@@ -125,6 +134,7 @@ function SendTransaction(f: {
   decimals: number;
   iconUrl: string;
   description: string;
+  reset: () => void;
 }) {
   const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState("");
@@ -175,9 +185,10 @@ function SendTransaction(f: {
           <a target="_blank" href={digestUrl}>
             {digest}
           </a>
-          &nbsp;(takes a few seconds to show in explorer)
+          &nbsp;(takes a few seconds to show in the explorer)
         </p>
       );
+      f.reset();
 
       const cap = objectChanges.find(
         (o) =>
