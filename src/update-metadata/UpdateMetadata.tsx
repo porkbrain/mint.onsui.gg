@@ -109,7 +109,6 @@ export function UpdateMetadata() {
           type="text"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
-          placeholder="USDC"
           name="token-symbol"
           id="token-symbol"
           aria-label="token-symbol"
@@ -122,7 +121,6 @@ export function UpdateMetadata() {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="USD Coin"
           name="token-name"
           id="token-name"
           aria-label="token-name"
@@ -135,7 +133,6 @@ export function UpdateMetadata() {
           type="text"
           value={iconUrl}
           onChange={(e) => setIconUrl(e.target.value)}
-          placeholder="https://www.circle.com/hubfs/usdcoin-ondark.svg"
           name="token-icon-url"
           id="token-icon-url"
           aria-label="token-icon-url"
@@ -147,9 +144,6 @@ export function UpdateMetadata() {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="USDC is a faster, safer, and more efficient way to send,
-          spend, and exchange money around the globe. USDC powers apps to
-          provide anytime access to payments and financial services."
           name="token-description"
           id="token-description"
           aria-label="token-description"
