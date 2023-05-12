@@ -7,18 +7,11 @@ import { TransactionBlock, formatAddress } from "@mysten/sui.js";
 import { useState } from "react";
 import { CHARGE_FEES, EXPLORER_URL, FEE_ADDR } from "../consts";
 import Select from "react-select";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  State,
-  RpcState,
-  TreasuryCapMap,
-  fetchAllTreasuryCaps,
-  suiClient,
-} from "../store";
+import { useSelector } from "react-redux";
+import { State, RpcState, TreasuryCapMap } from "../store";
 
 export function MintTokens() {
   const { isConnected, currentAccount } = useWalletKit();
-  const dispatch = useDispatch();
 
   // user gets to decide for which currency to mint tokens by the state in the
   // store
