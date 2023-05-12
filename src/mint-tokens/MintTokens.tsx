@@ -1,15 +1,14 @@
-import { ConnectButton, useWalletKit } from "@mysten/wallet-kit";
 import {
-  JsonRpcProvider,
-  TransactionBlock,
-  formatAddress,
-} from "@mysten/sui.js";
-import { useEffect, useState } from "react";
+  ConnectButton,
+  StandardWalletAdapter,
+  useWalletKit,
+} from "@mysten/wallet-kit";
+import { TransactionBlock, formatAddress } from "@mysten/sui.js";
+import { useState } from "react";
 import { CHARGE_FEES, EXPLORER_URL, FEE_ADDR } from "../consts";
 import Select from "react-select";
-import { useDispatch, useSelector } from "react-redux";
-import { State } from "src/store";
-import { TreasuryCapMap, fetchAllTreasuryCaps } from "../store/treasuryCap";
+import { useSelector } from "react-redux";
+import { State, RpcState, TreasuryCapMap } from "../store";
 
 export function MintTokens() {
   const { isConnected, currentAccount } = useWalletKit();
@@ -56,7 +55,7 @@ export function MintTokens() {
       <p>
         Select the currency for which you'd like to mint tokens. If you don't
         see your desired currency listed, ensure that you're logged in with the
-        correct wallet and then click the refresh button below.
+        correct wallet and then click the refresh button below. TODO
       </p>
 
       <Select
@@ -115,19 +114,7 @@ function SendTransaction({
   const { signAndExecuteTransactionBlock, isConnected, currentAccount } =
     useWalletKit();
 
-  // update user state when they connect wallet
-  const dispatch = useDispatch();
-  const rpc = useSelector<
-    State,
-    {
-      network: string;
-      provider: JsonRpcProvider;
-    }
-  >((state) => state.rpc);
-  useEffect(() => {
-    if (!isConnected || !currentAccount) return;
-    fetchAllTreasuryCaps(dispatch, rpc.provider, currentAccount.address);
-  }, [isConnected, currentAccount, rpc]);
+  const rpc = useSelector<State, RpcState>((state) => state.rpc);
 
   const treasuries = useSelector<State, TreasuryCapMap>(
     (state) => state.treasuryCap.value
@@ -137,94 +124,27 @@ function SendTransaction({
   const [okMsg, setOkMsg] = useState(<></>);
   const [isConfirming, setIsConfirming] = useState(false);
 
-  const handleClick = async () => {
-    setError("");
-    setOkMsg(<></>);
-    setIsConfirming(true);
-
-    try {
-      // cannot be clicked if not treasury
-      const innerType = treasuries[treasury as string].innerType;
-      const innerTypeStr = `${innerType.address}::${innerType.module}::${innerType.name}`;
-
-      const lines = mintInfo
-        .trim()
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean);
-
-      if (lines.length === 0) {
-        throw new Error("No instructions provided");
-      }
-
-      const tx = new TransactionBlock();
-
-      lines.forEach((l, i) => {
-        const parts = l.split(",");
-        if (parts.length !== 2) {
-          throw new Error(`Invalid format of line ${i + 1}`);
-        }
-
-        const recipient = parts[0].trim();
-        const amount = parts[1].trim();
-        if (!recipient.startsWith("0x")) {
-          throw new Error(
-            `Recipients must start with '0x', '${recipient}' does not`
-          );
-        }
-        if (!amount || !amount.match(/^\d+$/)) {
-          throw new Error(
-            `Amount must be a positive integer, '${amount}' is not`
-          );
-        }
-
-        tx.moveCall({
-          arguments: [
-            tx.object(treasury as string),
-            tx.pure(amount, "u64"),
-            tx.pure(recipient),
-          ],
-          typeArguments: [innerTypeStr],
-          target: `0x2::coin::mint_and_transfer`,
-        });
-      });
-
-      if (CHARGE_FEES) {
-        let [feeCoin] = tx.splitCoins({ kind: "GasCoin" }, [
-          tx.pure(500000000), // 0.5 SUI
-        ]);
-        tx.transferObjects([feeCoin], tx.pure(FEE_ADDR));
-      }
-
-      const { digest } = await signAndExecuteTransactionBlock({
-        transactionBlock: tx,
-      });
-
-      const digestUrl = `${EXPLORER_URL}/txblock/${digest}?network=${rpc.network}`;
-      setOkMsg(
-        <p style={{ color: "green" }}>
-          Transaction ok! Digest&nbsp;
-          <a target="_blank" href={digestUrl}>
-            {digest}
-          </a>
-          &nbsp;(takes a few seconds to show in the explorer)
-        </p>
-      );
-
-      resetMintInfo();
-    } catch (error) {
-      setError((error as Error).message);
-    }
-
-    setIsConfirming(false);
-  };
-
   if (isConnected && currentAccount) {
     return (
       <div>
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
         {okMsg}
-        <button onClick={handleClick} disabled={!treasury || isConfirming}>
+        <button
+          onClick={() =>
+            mintTokensTx({
+              setError,
+              setOkMsg,
+              setIsConfirming,
+              signAndExecuteTransactionBlock,
+              treasuries,
+              rpc,
+              mintInfo,
+              treasury: treasury!,
+              resetMintInfo,
+            })
+          }
+          disabled={!treasury || isConfirming}
+        >
           {isConfirming ? <>Confirming ...</> : <>Ask wallet to mint tokens</>}
         </button>
         as {formatAddress(currentAccount.address)}
@@ -233,4 +153,110 @@ function SendTransaction({
   } else {
     return <ConnectButton connectText={"Connect wallet to mint tokens"} />;
   }
+}
+
+type MintTokensTxParams = {
+  setError: (s: string) => void;
+  setOkMsg: (s: JSX.Element) => void;
+  setIsConfirming: (b: boolean) => void;
+  signAndExecuteTransactionBlock: (input: {
+    transactionBlock: TransactionBlock;
+  }) => ReturnType<StandardWalletAdapter["signAndExecuteTransactionBlock"]>;
+  treasuries: TreasuryCapMap;
+  mintInfo: string;
+  rpc: RpcState;
+  treasury: string;
+  resetMintInfo: () => void;
+};
+
+async function mintTokensTx({
+  setError,
+  setOkMsg,
+  setIsConfirming,
+  signAndExecuteTransactionBlock,
+  treasuries,
+  rpc,
+  mintInfo,
+  treasury,
+  resetMintInfo,
+}: MintTokensTxParams) {
+  setError("");
+  setOkMsg(<></>);
+  setIsConfirming(true);
+
+  try {
+    // cannot be clicked if not treasury
+    const innerType = treasuries[treasury].innerType;
+    const innerTypeStr = `${innerType.address}::${innerType.module}::${innerType.name}`;
+
+    const lines = mintInfo
+      .trim()
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    if (lines.length === 0) {
+      throw new Error("No instructions provided");
+    }
+
+    const tx = new TransactionBlock();
+
+    lines.forEach((l, i) => {
+      const parts = l.split(",");
+      if (parts.length !== 2) {
+        throw new Error(`Invalid format of line ${i + 1}`);
+      }
+
+      const recipient = parts[0].trim();
+      const amount = parts[1].trim();
+      if (!recipient.startsWith("0x")) {
+        throw new Error(
+          `Recipients must start with '0x', '${recipient}' does not`
+        );
+      }
+      if (!amount || !amount.match(/^\d+$/)) {
+        throw new Error(
+          `Amount must be a positive integer, '${amount}' is not`
+        );
+      }
+
+      tx.moveCall({
+        arguments: [
+          tx.object(treasury as string),
+          tx.pure(amount, "u64"),
+          tx.pure(recipient),
+        ],
+        typeArguments: [innerTypeStr],
+        target: `0x2::coin::mint_and_transfer`,
+      });
+    });
+
+    if (CHARGE_FEES) {
+      let [feeCoin] = tx.splitCoins({ kind: "GasCoin" }, [
+        tx.pure(500000000), // 0.5 SUI
+      ]);
+      tx.transferObjects([feeCoin], tx.pure(FEE_ADDR));
+    }
+
+    const { digest } = await signAndExecuteTransactionBlock({
+      transactionBlock: tx,
+    });
+
+    const digestUrl = `${EXPLORER_URL}/txblock/${digest}?network=${rpc.network}`;
+    setOkMsg(
+      <p style={{ color: "green" }}>
+        Transaction ok! Digest&nbsp;
+        <a target="_blank" href={digestUrl}>
+          {digest}
+        </a>
+        &nbsp;(takes a few seconds to show in the explorer)
+      </p>
+    );
+
+    resetMintInfo();
+  } catch (error) {
+    setError((error as Error).message);
+  }
+
+  setIsConfirming(false);
 }

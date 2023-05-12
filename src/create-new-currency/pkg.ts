@@ -9,6 +9,14 @@ const MAX_DESCRIPTION_LENGTH = 320;
 // If empty, then icon is option None, otherwise should be a URL
 const MAX_ICON_LENGTH = 320;
 
+export type Currency = {
+  symbol: string; // 2-8 chars
+  decimals: number; // 0-12
+  name: string; // 0-32 chars
+  description: string; // 0-320 chars
+  iconUrl: string; // 0-320 chars
+};
+
 /**
  * Generates a Move package bytecode for a new contract that has
  * - symbol chosen by user
@@ -18,13 +26,7 @@ const MAX_ICON_LENGTH = 320;
  * - (opt) currency description
  * - (opt) icon url
  */
-export function intoBase64(f: {
-  symbol: string; // 2-8 chars
-  decimals: number; // 0-12
-  name: string; // 0-32 chars
-  description: string; // 0-320 chars
-  iconUrl: string; // 0-320 chars
-}): string {
+export function intoBase64(f: Currency) {
   let { decimals, name, symbol, description, iconUrl } = f;
 
   iconUrl = iconUrl.trim();

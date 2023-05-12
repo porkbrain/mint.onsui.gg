@@ -4,3 +4,6 @@ export const FEE_ADDR =
 export const CHARGE_FEES = false;
 
 export const EXPLORER_URL = "https://suiexplorer.com";
+
+export const DEFAULT_TESTNET_RPC_ENDPOINT =
+  "https://sui-testnet-endpoint.blockvision.org";

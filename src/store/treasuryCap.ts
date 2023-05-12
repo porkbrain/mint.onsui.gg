@@ -15,13 +15,13 @@ export type TreasuryCapMap = {
   [addr: string]: TreasuryCap;
 };
 
-type SetTreasuryCapAction = {
+export type SetTreasuryCapAction = {
   payload: {
     cap: TreasuryCap;
   };
 };
 
-type SetRawTreasuryCapAction = {
+export type SetRawTreasuryCapAction = {
   payload: {
     addr: string;
     objectType: string; // coin::TreasuryCap<T>
@@ -32,8 +32,16 @@ export const treasuryCapSlice = createSlice({
   name: "treasuryCap",
   initialState: {
     value: {} as TreasuryCapMap,
+    isLoaded: false,
   },
   reducers: {
+    /**
+     * When we're done loading all currencies, set `isLoaded` to true.
+     * This can only happen in the `fetchAllTreasuryCaps` function.
+     */
+    setLoaded: (state) => {
+      state.isLoaded = true;
+    },
     setTreasuryCap: (state, { payload }: SetTreasuryCapAction) => {
       state.value[payload.cap.addr] = payload.cap;
     },
@@ -114,5 +122,6 @@ export async function fetchAllTreasuryCaps(
     cursor = nextCursor;
   }
 
+  dispatch(treasuryCapSlice.actions.setLoaded());
   console.log("Done fetching currencies for user");
 }

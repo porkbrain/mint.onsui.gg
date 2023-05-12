@@ -1,15 +1,20 @@
 import { configureStore } from "@reduxjs/toolkit";
+import rpcReducer, { RpcState } from "./rpc";
 import treasuryCapReducer, { TreasuryCapMap } from "./treasuryCap";
-import rpcReducer from "./rpc";
-import { JsonRpcProvider } from "@mysten/sui.js";
+import coinMetadataReducer, { CoinMetadataMap } from "./coinMetadata";
+
+export * from "./coinMetadata";
+export * from "./rpc";
+export * from "./treasuryCap";
 
 export type State = {
   treasuryCap: {
     value: TreasuryCapMap;
+    isLoaded: boolean;
   };
-  rpc: {
-    provider: JsonRpcProvider;
-    network: string;
+  rpc: RpcState;
+  coinMetadata: {
+    value: CoinMetadataMap;
   };
 };
 
@@ -17,5 +22,6 @@ export default configureStore<State>({
   reducer: {
     treasuryCap: treasuryCapReducer,
     rpc: rpcReducer,
+    coinMetadata: coinMetadataReducer,
   },
 });
