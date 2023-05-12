@@ -46,13 +46,15 @@ export const treasuryCapSlice = createSlice({
      */
     setRawTreasuryCap: (state, { payload }: SetRawTreasuryCapAction) => {
       const [address, module, name] = payload.objectType
-        .slice(payload.objectType.indexOf("<"), payload.objectType.length - 1)
+        .slice(
+          payload.objectType.indexOf("<") + 1,
+          payload.objectType.length - 1
+        )
         .split("::");
       state.value[payload.addr] = {
         addr: payload.addr,
         innerType: { address, module, name },
       };
-      console.log("setting treasury cap", state.value[payload.addr]);
     },
   },
 });
