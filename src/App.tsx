@@ -11,6 +11,7 @@ export function App() {
       <Provider store={store}>
         <WalletKitProvider>
           <h1>Coinnu | Sui currency management tool</h1>
+          <i>coinnu at porkbrain dotcom</i>
 
           <CreateNewCurrency></CreateNewCurrency>
           <MintTokens></MintTokens>
