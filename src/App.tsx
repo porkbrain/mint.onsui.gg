@@ -1,18 +1,24 @@
 import { WalletKitProvider, useWalletKit } from "@mysten/wallet-kit";
 import { formatAddress } from "@mysten/sui.js";
 import { CreateNewCurrency } from "./create-new-currency/CreateNewCurrency";
+import { MintTokens } from "./mint-tokens/MintTokens";
+import store from "./store";
+import { Provider } from "react-redux";
 
 export function App() {
   return (
     <section>
-      <WalletKitProvider>
-        <h1>Coinnu | Sui currency management tool</h1>
+      <Provider store={store}>
+        <WalletKitProvider>
+          <h1>Coinnu | Sui currency management tool</h1>
 
-        <CreateNewCurrency></CreateNewCurrency>
+          <CreateNewCurrency></CreateNewCurrency>
+          <MintTokens></MintTokens>
 
-        <hr />
-        <DisconnectWallet></DisconnectWallet>
-      </WalletKitProvider>
+          <hr />
+          <DisconnectWallet></DisconnectWallet>
+        </WalletKitProvider>
+      </Provider>
     </section>
   );
 }

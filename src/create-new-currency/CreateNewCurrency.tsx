@@ -2,7 +2,10 @@ import { ConnectButton, useWalletKit } from "@mysten/wallet-kit";
 import { TransactionBlock, formatAddress } from "@mysten/sui.js";
 import { intoBase64 } from "./pkg";
 import { useState } from "react";
-import { FEE_ADDR } from "../consts";
+import { CHARGE_FEES, EXPLORER_URL, FEE_ADDR } from "../consts";
+import { useDispatch, useSelector } from "react-redux";
+import { setRawTreasuryCap } from "../store/treasuryCap";
+import { State } from "../store";
 
 export function CreateNewCurrency() {
   const [symbol, setSymbol] = useState("");
@@ -123,17 +126,22 @@ function SendTransaction(f: {
   iconUrl: string;
   description: string;
 }) {
+  const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState("");
-  const [okMsg, setOkMsg] = useState("");
+  const [okMsg, setOkMsg] = useState(<></>);
+
+  const dispatch = useDispatch();
+  const network = useSelector<State, string>((state) => state.rpc.network);
 
   const { signAndExecuteTransactionBlock, isConnected, currentAccount } =
     useWalletKit();
 
   const handleClick = async () => {
-    try {
-      setError("");
-      setOkMsg("");
+    setError("");
+    setOkMsg(<></>);
+    setIsConfirming(true);
 
+    try {
       const pkg = intoBase64(f);
       const dependencies = [
         "0x0000000000000000000000000000000000000000000000000000000000000001",
@@ -146,43 +154,69 @@ function SendTransaction(f: {
         dependencies,
       });
       tx.transferObjects([upgradeCap], tx.pure(currentAccount!.address));
-      let [feeCoin] = tx.splitCoins({ kind: "GasCoin" }, [
-        tx.pure(973000000), // 0.9 SUI
-      ]);
-      tx.transferObjects([feeCoin], tx.pure(FEE_ADDR));
+
+      if (CHARGE_FEES) {
+        let [feeCoin] = tx.splitCoins({ kind: "GasCoin" }, [
+          tx.pure(973000000), // 0.9 SUI
+        ]);
+        tx.transferObjects([feeCoin], tx.pure(FEE_ADDR));
+      }
 
       const { digest, objectChanges: maybeObjectChanges } =
         await signAndExecuteTransactionBlock({
           transactionBlock: tx,
         });
-
-      // TODO: explorer link
-      setOkMsg(`Transaction ok! Digest '${digest}'`);
-
-      // TODO: reload list of currencies
       const objectChanges = maybeObjectChanges || [];
-      objectChanges.find(
-        (o) =>
-          o.type === "created" &&
-          o.objectType.startsWith("0x2::coin::CoinMetadata")
+
+      const digestUrl = `${EXPLORER_URL}/txblock/${digest}?network=${network}`;
+      setOkMsg(
+        <p style={{ color: "green" }}>
+          Transaction ok! Digest&nbsp;
+          <a target="_blank" href={digestUrl}>
+            {digest}
+          </a>
+          &nbsp;(takes a few seconds to show in explorer)
+        </p>
       );
+
+      const cap = objectChanges.find(
+        (o) =>
+          o.type === "created" && o.objectType.includes("::coin::TreasuryCap<")
+      );
+      console.log("cap", cap);
+      console.log("objectChanges", objectChanges);
+      if (cap && cap.type === "created") {
+        dispatch(
+          setRawTreasuryCap({
+            addr: cap.objectId,
+            objectType: cap.objectType,
+          })
+        );
+      }
+
+      // TODO: store metadata
       objectChanges.find(
         (o) =>
-          o.type === "created" &&
-          o.objectType.startsWith("0x2::coin::TreasuryCap")
+          o.type === "created" && o.objectType.includes("::coin::CoinMetadata<")
       );
     } catch (error) {
       setError((error as Error).message);
     }
+
+    setIsConfirming(false);
   };
 
   if (isConnected && currentAccount) {
     return (
       <div>
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
-        {okMsg && <p style={{ color: "green" }}>{okMsg}</p>}
-        <button onClick={handleClick}>
-          Ask wallet to create a new currency
+        {okMsg}
+        <button onClick={handleClick} disabled={isConfirming}>
+          {isConfirming ? (
+            <>Confirming ...</>
+          ) : (
+            <>Ask wallet to create a new currency</>
+          )}
         </button>
         as {formatAddress(currentAccount.address)}
       </div>
