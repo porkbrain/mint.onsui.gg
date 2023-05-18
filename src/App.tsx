@@ -71,8 +71,8 @@ function Section() {
 
   return (
     <section>
-      <h1>Coinnu | Sui currency management tool</h1>
-      <i>coinnu at porkbrain dotcom</i>
+      <h1>onsui.gg | Currency management tool</h1>
+      <i>onsui at porkbrain dotcom</i>
       <hr />
       <Settings></Settings>
       <hr />

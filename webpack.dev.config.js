@@ -2,7 +2,6 @@
 
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const DashboardPlugin = require("webpack-dashboard/plugin");
 const ReactRefreshPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const loaders = require("./webpack.loaders");
 
@@ -86,7 +85,6 @@ module.exports = {
     }),
     new webpack.NoEmitOnErrorsPlugin(),
     new ReactRefreshPlugin(),
-    new DashboardPlugin(),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
       inject: "body",
