@@ -7,4 +7,4 @@ description = "A blueprint package for publishing a token"
 [dependencies.Sui]
 git = "https://github.com/MystenLabs/sui.git"
 subdir = "crates/sui-framework/packages/sui-framework"
-rev = "38c31cdd0f2ae3963d1e06f00c766cd7f90a7be6"
+rev = "ae1212baf8f0837e25926d941db3d26a61c1bea2"
