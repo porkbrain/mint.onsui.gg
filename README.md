@@ -1,6 +1,6 @@
-# Coinnu.com | Mint tool
+# Coinnu.com | Sui Mint tool
 
-With this tool you can
+With this online tool you can
 
 - mint your own currency on Sui network;
 - mint tokens of your currency;
