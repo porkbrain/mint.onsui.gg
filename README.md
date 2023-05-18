@@ -1,5 +1,3 @@
-# Coinnu.com | Sui Mint tool
-
 With this online tool you can
 
 - mint your own currency on Sui network;
