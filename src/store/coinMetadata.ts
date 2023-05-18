@@ -45,63 +45,67 @@ export async function fetchCoinMetadata(
 ) {
   console.log("Fetching 0x2::coin::CoinMetadata for", treasury.addr);
 
-  const { data } = await sui.queryTransactionBlocks({
-    limit: 1,
-    order: "ascending",
-    filter: {
-      ChangedObject: treasury.addr,
-    },
-    options: {
-      showEffects: true,
-    },
-  });
-
-  if (!data.length) {
-    console.log("No initial tx found for", treasury.addr);
-    return;
-  }
-  const createdAddrs = data[0].effects?.created?.map(
-    (o) => o.reference.objectId
-  );
-  if (!createdAddrs) {
-    console.log("No initial tx found for", treasury.addr);
-    return;
-  }
-
-  const resp = await sui.multiGetObjects({
-    ids: createdAddrs,
-    options: { showType: true, showContent: true },
-  });
-
-  const metadata = resp
-    .map((o) => o.data)
-    .filter(Boolean)
-    .find((o) =>
-      o!.type!.includes(
-        `:coin::CoinMetadata<${treasury.innerType.address}::${treasury.innerType.module}::${treasury.innerType.name}>`
-      )
-    );
-
-  if (!metadata) {
-    console.log("No metadata found for", treasury.addr);
-    return;
-  }
-
-  if (metadata.content?.dataType !== "moveObject") {
-    // unreachable
-    return;
-  }
-
-  dispatch(
-    setCoinMetadata({
-      treasuryAddr: treasury.addr,
-      metadata: {
-        addr: metadata.objectId,
-        description: metadata.content.fields["description"],
-        iconUrl: metadata.content.fields["icon_url"],
-        name: metadata.content.fields["name"],
-        symbol: metadata.content.fields["symbol"],
+  try {
+    const { data } = await sui.queryTransactionBlocks({
+      limit: 1,
+      order: "ascending",
+      filter: {
+        ChangedObject: treasury.addr,
       },
-    })
-  );
+      options: {
+        showEffects: true,
+      },
+    });
+
+    if (!data.length) {
+      console.log("No initial tx found for", treasury.addr);
+      return;
+    }
+    const createdAddrs = data[0].effects?.created
+      ?.map((o) => o.reference.objectId)
+      .filter(Boolean);
+    if (!createdAddrs) {
+      console.log("No initial tx found for", treasury.addr);
+      return;
+    }
+
+    const resp = await sui.multiGetObjects({
+      ids: createdAddrs,
+      options: { showType: true, showContent: true },
+    });
+
+    const metadata = resp
+      .map((o) => o.data)
+      .filter(Boolean)
+      .find((o) =>
+        o!.type!.includes(
+          `:coin::CoinMetadata<${treasury.innerType.address}::${treasury.innerType.module}::${treasury.innerType.name}>`
+        )
+      );
+
+    if (!metadata) {
+      console.log("No metadata found for", treasury.addr);
+      return;
+    }
+
+    if (metadata.content?.dataType !== "moveObject") {
+      // unreachable
+      return;
+    }
+
+    dispatch(
+      setCoinMetadata({
+        treasuryAddr: treasury.addr,
+        metadata: {
+          addr: metadata.objectId,
+          description: metadata.content.fields["description"],
+          iconUrl: metadata.content.fields["icon_url"],
+          name: metadata.content.fields["name"],
+          symbol: metadata.content.fields["symbol"],
+        },
+      })
+    );
+  } catch (err) {
+    console.log("Error fetching coin metadata", err);
+  }
 }

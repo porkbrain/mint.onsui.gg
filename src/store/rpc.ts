@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { DEFAULT_TESTNET_RPC_ENDPOINT } from "../consts";
+import { DEFAULT_FULLNODE, DEFAULT_NETWORK } from "../consts";
 import { Connection, JsonRpcProvider } from "@mysten/sui.js";
 
 export type RpcState = {
@@ -7,17 +7,21 @@ export type RpcState = {
   network: "mainnet" | "testnet" | "devnet";
 };
 
-export type SetRpcStateAction = {
-  payload: RpcState;
+export type SetNetworkAction = {
+  payload: "mainnet" | "testnet" | "devnet";
+};
+
+export type SetFullNodeAction = {
+  payload: string;
 };
 
 /**
  * Gets updated when the user selects a different RPC endpoint or network.
  * We use a hook in the App component to update the suiClient connection.
  */
-export const suiClient = new JsonRpcProvider(
+export let suiClient = new JsonRpcProvider(
   new Connection({
-    fullnode: DEFAULT_TESTNET_RPC_ENDPOINT,
+    fullnode: DEFAULT_FULLNODE,
   })
 );
 
@@ -25,16 +29,33 @@ export const suiClientSlice = createSlice({
   name: "suiClient",
   initialState: {
     fullnode: suiClient.connection.fullnode,
-    network: "testnet",
+    network: DEFAULT_NETWORK,
   } as RpcState,
   reducers: {
-    changeRpc: (state, { payload }: SetRpcStateAction) => {
-      state.fullnode = payload.fullnode;
-      state.network = payload.network;
+    setNetwork: (state, { payload }: SetNetworkAction) => {
+      state.network = payload;
+
+      // update URL for page reloads/sharing
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set("network", payload);
+      window.history.pushState({}, "", currentUrl.toString());
+    },
+    setFullnode: (state, { payload }: SetFullNodeAction) => {
+      state.fullnode = payload;
+      suiClient = new JsonRpcProvider(
+        new Connection({
+          fullnode: payload,
+        })
+      );
+
+      // update URL for page reloads/sharing
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set("fullnode", payload);
+      window.history.pushState({}, "", currentUrl.toString());
     },
   },
 });
 
-export const { changeRpc } = suiClientSlice.actions;
+export const { setNetwork, setFullnode } = suiClientSlice.actions;
 
 export default suiClientSlice.reducer;

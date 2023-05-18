@@ -12,11 +12,27 @@ import {
   FEE_ADDR,
 } from "../consts";
 import Select from "react-select";
-import { useSelector } from "react-redux";
-import { State, RpcState, TreasuryCapMap } from "../store";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  State,
+  RpcState,
+  TreasuryCapMap,
+  resetTreasuryCap,
+  fetchAllTreasuryCaps,
+  suiClient,
+} from "../store";
 
 export function MintTokens() {
   const { isConnected, currentAccount } = useWalletKit();
+  const dispatch = useDispatch();
+
+  // if there's an error, we print it and give the user a retry button
+  const lastTreasuryLoadingError = useSelector<State, string | undefined>(
+    (state) => state.treasuryCap.lastError
+  );
+  const areTreasuriesLoading = useSelector<State, boolean>(
+    (state) => state.treasuryCap.loading === "inProgress"
+  );
 
   // user gets to decide for which currency to mint tokens by the state in the
   // store
@@ -66,6 +82,12 @@ export function MintTokens() {
         correct wallet.
       </p>
 
+      {lastTreasuryLoadingError ? (
+        <span style={{ color: "red" }}>{lastTreasuryLoadingError}</span>
+      ) : (
+        <></>
+      )}
+
       <Select
         isClearable={true}
         required={true}
@@ -74,6 +96,25 @@ export function MintTokens() {
         options={selectOptions}
         styles={DARK_THEME_STYLES}
       />
+
+      {currentAccount ? (
+        <button
+          style={{ marginTop: "6px" }}
+          disabled={areTreasuriesLoading}
+          onClick={() => {
+            dispatch(resetTreasuryCap());
+            fetchAllTreasuryCaps(dispatch, suiClient, currentAccount.address);
+          }}
+        >
+          {areTreasuriesLoading ? (
+            <div className="spinner"></div>
+          ) : (
+            "Reload currencies"
+          )}
+        </button>
+      ) : (
+        <></>
+      )}
       <br />
 
       <p>

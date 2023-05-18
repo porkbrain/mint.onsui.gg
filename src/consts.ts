@@ -1,12 +1,27 @@
 export const FEE_ADDR =
   "0xf32fe294fd2ec01882374dafdf7feb1ff064bd8e0fa997d26602d072a001fe43";
 
-export const CHARGE_FEES = false;
+export const CHARGE_FEES = true;
 
 export const EXPLORER_URL = "https://suiexplorer.com";
 
-export const DEFAULT_TESTNET_RPC_ENDPOINT =
-  "https://sui-testnet-endpoint.blockvision.org";
+export const DEVNET_FULLNODE = "https://fullnode.devnet.sui.io";
+export const TESTNET_FULLNODE = "https://sui-testnet-endpoint.blockvision.org";
+export const MAINNET_FULLNODE = "https://sui-mainnet-endpoint.blockvision.org";
+export const FULLNODES = {
+  devnet: DEVNET_FULLNODE,
+  testnet: TESTNET_FULLNODE,
+  mainnet: MAINNET_FULLNODE,
+};
+
+const url = new URLSearchParams(window.location.search);
+const n = url.get("network");
+export const DEFAULT_NETWORK =
+  n === "mainnet" || n === "testnet" || n === "devnet" ? n : "mainnet";
+const fullnode = url.get("fullnode");
+export const DEFAULT_FULLNODE = fullnode
+  ? fullnode
+  : FULLNODES[DEFAULT_NETWORK];
 
 /**
  * Restyles the default react-select theme to match the dark theme.

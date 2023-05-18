@@ -39,8 +39,8 @@ export function CreateNewCurrency() {
       <p>
         To create a new currency on Sui, you must publish a package. This
         utility assists you in <b>publishing your own</b>
-        .&nbsp;You'll spend slightly less than 1 SUI on gas, storage, and fees.
-        Once published, you can mint tokens&nbsp;
+        .&nbsp;You'll spend slightly less than 1 SUI on gas and fees. Once
+        published, you can mint tokens&nbsp;
         <a href="#mint-tokens">here</a>. You have&nbsp;
         <b>100% control and ownership</b> over your currency.
       </p>

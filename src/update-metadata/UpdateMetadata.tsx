@@ -91,7 +91,7 @@ export function UpdateMetadata() {
 
       <p>Once you set a currency's URL, it cannot be unset.</p>
 
-      <p>You'll spend slightly less than 1 SUI on gas, storage, and fees.</p>
+      <p>You'll spend slightly less than 1 SUI on gas and fees.</p>
 
       <Select
         isClearable={true}
