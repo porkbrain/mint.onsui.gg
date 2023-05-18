@@ -6,6 +6,8 @@ With this online tool you can
 
 # Development
 
+Shoutout to [VaclavDanek's `react-skeleton-app`](https://github.com/VaclavDanek/react-skeleton-app).
+
 To install dependencies:
 
 ```bash
