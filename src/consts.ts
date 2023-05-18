@@ -1,5 +1,5 @@
 export const FEE_ADDR =
-  "0xf32fe294fd2ec01882374dafdf7feb1ff064bd8e0fa997d26602d072a001fe43";
+  "0x40343bad48a614d50e6eee21d53e065482c2abb85c47bdd2a5ce45e2445e2589";
 
 export const CHARGE_FEES = true;
 
