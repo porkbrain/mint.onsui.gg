@@ -30,7 +30,7 @@ export function CreateNewCurrency() {
     <div>
       <h2 id="create-new-currency">
         <img
-          src="/img/detective-duck.64x64.png"
+          src="img/detective-duck.64x64.png"
           width={32}
           alt="Detective duck logo"
         />

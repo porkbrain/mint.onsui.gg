@@ -82,7 +82,7 @@ export function UpdateMetadata() {
     <div>
       <h2 id="update-metadata">
         <img
-          src="/img/detective-duck.64x64.png"
+          src="img/detective-duck.64x64.png"
           width={32}
           alt="Detective duck logo"
         />
