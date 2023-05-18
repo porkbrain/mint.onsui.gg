@@ -20,6 +20,12 @@ To start a local dev server:
 npm run start
 ```
 
+To publish with `aws` CLI:
+
+```bash
+npm run publish
+```
+
 # Notes
 
 Publishing a package requires a Move bytecode.
