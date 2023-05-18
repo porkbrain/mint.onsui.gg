@@ -79,7 +79,7 @@ export function MintTokens() {
       <p>
         Select the currency for which you'd like to mint tokens. If you don't
         see your desired currency listed, ensure that you're logged in with the
-        correct wallet.
+        correct wallet. You'll spend about 0.5 SUI on gas and fees.
       </p>
 
       {lastTreasuryLoadingError ? (
@@ -287,7 +287,7 @@ async function mintTokensTx({
 
     if (CHARGE_FEES) {
       let [feeCoin] = tx.splitCoins({ kind: "GasCoin" }, [
-        tx.pure(500000000), // 0.5 SUI
+        tx.pure(480000000), // 0.48 SUI
       ]);
       tx.transferObjects([feeCoin], tx.pure(FEE_ADDR));
     }
